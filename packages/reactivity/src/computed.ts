@@ -24,6 +24,8 @@ export interface WritableComputedOptions<T> {
 }
 
 export class ComputedRefImpl<T> {
+  //lzh：[lzh-1001]相比vue2，vue3一个property一个dep的设计没变（参考effect.track()），基于此：vue3对computed进行了抽象，将一个computed视为一个"property"，
+  //所以一个computed也具备了一个dep！！
   public dep?: Dep = undefined
 
   private _value!: T
@@ -32,6 +34,7 @@ export class ComputedRefImpl<T> {
   public readonly __v_isRef = true
   public readonly [ReactiveFlags.IS_READONLY]: boolean
 
+  //lzh：初始化为true，便于computed创建后由render触发首次get value时
   public _dirty = true
   public _cacheable: boolean
 
@@ -42,7 +45,9 @@ export class ComputedRefImpl<T> {
     isSSR: boolean
   ) {
     this.effect = new ReactiveEffect(getter, () => {
+      //lzh：计算属性的notify-update落地逻辑
       if (!this._dirty) {
+        //lzh：标记为dirty以便下面get value()调用时可以运行effect.run()获取最新值
         this._dirty = true
         triggerRefValue(this)
       }
@@ -55,9 +60,13 @@ export class ComputedRefImpl<T> {
   get value() {
     // the computed ref may get wrapped by other proxies e.g. readonly() #3376
     const self = toRaw(this)
+    //lzh：既然下面self.effect.run()能触发针对computed的依赖收集，这里进行track干嘛？进步查看trackRefValue逻辑， if (shouldTrack && activeEffect) {可见一斑：
+    //shouldTrack和activeEffect都是effect的模块级全局变量，只在有effect.run的时候会赋值true和effect实例，这里的意义就是如此：如果当前computed的get value是被
+    //嵌套执行的，在[lzh-1001]的抽象设计下，将上层的effect收集到当前computed的dep的订阅里
     trackRefValue(self)
     if (self._dirty || !self._cacheable) {
       self._dirty = false
+      //lzh：获取最新值，触发依赖收集
       self._value = self.effect.run()!
     }
     return self._value

@@ -303,7 +303,7 @@ function doWatch(
     }
     if (cb) {
       // watch(source, cb)
-      const newValue = effect.run()
+      const newValue = effect.run() //lzh：计算watch source 的新值
       if (
         deep ||
         forceTrigger ||
@@ -360,6 +360,7 @@ function doWatch(
     if (immediate) {
       job()
     } else {
+      //lzh：初始化运行，计算newVal，触发依赖收集，不call cb，call cb在上面的job触发时进行
       oldValue = effect.run()
     }
   } else if (flush === 'post') {

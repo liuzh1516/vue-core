@@ -97,6 +97,8 @@ export class ReactiveEffect<T = any> {
     }
     try {
       this.parent = activeEffect
+      //lzh：设置模块级全局activeEffect，以便trackEffects将当前effect收集到dep中
+      //谁run，被使用的属性的dep就收集谁
       activeEffect = this
       shouldTrack = true
 
@@ -107,6 +109,9 @@ export class ReactiveEffect<T = any> {
       } else {
         cleanupEffect(this)
       }
+      //lzh：fn就是watch或computed的source，即监听的属性或多属性组成的表达式。
+      //计算属性触发ComputedRefImpl.get value()；普通属性触发proxy的get。
+      //触发各自的递归依赖收集
       return this.fn()
     } finally {
       if (effectTrackDepth <= maxMarkerBits) {
@@ -210,6 +215,8 @@ export function resetTracking() {
   shouldTrack = last === undefined ? true : last
 }
 
+//lzh：相比vue2，vue3一个property一个dep的设计没变，基于此：vue3对computed进行了抽象，将一个computed视为一个"property"，
+//所以一个computed也具备了一个dep！！
 export function track(target: object, type: TrackOpTypes, key: unknown) {
   if (shouldTrack && activeEffect) {
     let depsMap = targetMap.get(target)

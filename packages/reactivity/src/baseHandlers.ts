@@ -121,6 +121,7 @@ function createGetter(isReadonly = false, shallow = false) {
     }
 
     if (!isReadonly) {
+      //lzh：普通属性依赖收集点
       track(target, TrackOpTypes.GET, key)
     }
 
