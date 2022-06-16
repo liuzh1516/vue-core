@@ -59,6 +59,7 @@ export const ErrorTypeStrings: Record<number | string, string> = {
 
 export type ErrorTypes = LifecycleHooks | ErrorCodes
 
+//lzh：这个函数既可以执行watch和computed的source function，又可以执行watch的cb（可通过args带newVal和oldVal）
 export function callWithErrorHandling(
   fn: Function,
   instance: ComponentInternalInstance | null,

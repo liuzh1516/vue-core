@@ -25,6 +25,9 @@ export const createDep = (effects?: ReactiveEffect[]): Dep => {
   return dep
 }
 
+//lzh：这里其实很好理解，对于按位与&运算，主要作用就是置0，因为trackOpBit肯定>0，dep.w和dep.n初始都为0，所以
+//只要dep.w或dep.n不被赋值，dep.w & trackOpBit和dep.n & trackOpBit都<0
+//当deps[i].w |= trackOpBit时，按位或|运算，主要作用是消除0，因为trackOpBit肯定>0，所以deps[i].w |= trackOpBit使得dep.w>0
 export const wasTracked = (dep: Dep): boolean => (dep.w & trackOpBit) > 0
 
 export const newTracked = (dep: Dep): boolean => (dep.n & trackOpBit) > 0
@@ -32,6 +35,7 @@ export const newTracked = (dep: Dep): boolean => (dep.n & trackOpBit) > 0
 export const initDepMarkers = ({ deps }: ReactiveEffect) => {
   if (deps.length) {
     for (let i = 0; i < deps.length; i++) {
+      //lzh：标记dep的（trackOpBit二进制的值为1的位）也为1，以表示在trackOpBit层已收集过activeEffect
       deps[i].w |= trackOpBit // set was tracked
     }
   }
@@ -43,12 +47,15 @@ export const finalizeDepMarkers = (effect: ReactiveEffect) => {
     let ptr = 0
     for (let i = 0; i < deps.length; i++) {
       const dep = deps[i]
+      //lzh：疑问？这个地方什么情况下会发生，属于unbelievable的情况吧
       if (wasTracked(dep) && !newTracked(dep)) {
         dep.delete(effect)
       } else {
         deps[ptr++] = dep
       }
       // clear bits
+      //lzh：这个地方不清除的话没关系吧，因为基于wasTracked和newTracked都是基于trackOpBit的按位与，trackOpBit会在每层effect run结束后回退
+      //退回后上一个位就是0，虽然dep.w/n的上一个位还是1（未清除trackOpBit按位或的影响），按位与的时候只要一个是0，结果就是0
       dep.w &= ~trackOpBit
       dep.n &= ~trackOpBit
     }

@@ -52,6 +52,9 @@ export const MAP_KEY_ITERATE_KEY = Symbol(__DEV__ ? 'Map key iterate' : '')
 
 export class ReactiveEffect<T = any> {
   active = true
+  //lzh：记录哪些dep追踪了自己，
+  //说再直白点：哪些property或computed式的'property'追踪了自己。
+  //更更直白点：reactiveEffect的fn（即监听的表达式）中原子的property和'computed property'所对应的dep
   deps: Dep[] = []
   parent: ReactiveEffect | undefined = undefined
 
@@ -253,6 +256,7 @@ export function trackEffects(
 
   if (shouldTrack) {
     dep.add(activeEffect!)
+    //lzh：effect也要知道有哪些deps追踪了自己
     activeEffect!.deps.push(dep)
     if (__DEV__ && activeEffect!.onTrack) {
       activeEffect!.onTrack({

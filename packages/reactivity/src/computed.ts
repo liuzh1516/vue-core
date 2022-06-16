@@ -25,7 +25,7 @@ export interface WritableComputedOptions<T> {
 
 export class ComputedRefImpl<T> {
   //lzh：[lzh-1001]相比vue2，vue3一个property一个dep的设计没变（参考effect.track()），基于此：vue3对computed进行了抽象，将一个computed视为一个"property"，
-  //所以一个computed也具备了一个dep！！
+  //所以一个computed也具备了一个dep！！而computed作为一个ReactiveEffect还具有一个effect.deps，这个用来存储
   public dep?: Dep = undefined
 
   private _value!: T
