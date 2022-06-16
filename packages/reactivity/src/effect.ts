@@ -360,6 +360,7 @@ export function triggerEffects(
 ) {
   // spread into array for stabilization
   const effects = isArray(dep) ? dep : [...dep]
+  //lzh：先更新computed，在更新其他
   for (const effect of effects) {
     if (effect.computed) {
       triggerEffect(effect, debuggerEventExtraInfo)

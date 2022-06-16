@@ -1571,7 +1571,7 @@ function baseCreateRenderer(
         : void 0
       update.ownerInstance = instance
     }
-
+    //lzh：启动effect.run()，触发基于template的componentUpdateFn运行，进行针对render watcher的依赖收集
     update()
   }
 

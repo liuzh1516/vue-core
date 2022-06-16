@@ -222,6 +222,7 @@ export function flushPostFlushCbs(seen?: CountMap) {
 const getId = (job: SchedulerJob): number =>
   job.id == null ? Infinity : job.id
 
+//lzh：此方法在微任务中运行
 function flushJobs(seen?: CountMap) {
   isFlushPending = false
   isFlushing = true

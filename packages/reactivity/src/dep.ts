@@ -25,11 +25,9 @@ export const createDep = (effects?: ReactiveEffect[]): Dep => {
   return dep
 }
 
-//lzh：这里其实很好理解，对于按位与&运算，主要作用就是置0，因为trackOpBit肯定>0，dep.w和dep.n初始都为0，所以
-//只要dep.w或dep.n不被赋值，dep.w & trackOpBit和dep.n & trackOpBit都<0
-//当deps[i].w |= trackOpBit时，按位或|运算，主要作用是消除0，因为trackOpBit肯定>0，所以deps[i].w |= trackOpBit使得dep.w>0
+//lzh：wasTracked代表对于当前effect来说，他所监听的某个property的dep，之前已经追踪过当前effect了
 export const wasTracked = (dep: Dep): boolean => (dep.w & trackOpBit) > 0
-
+//lzh：newTracked代表对于当前effect来说，他所监听的某个property的dep，在当前effect的fn内层级（不算嵌套的property），已经追踪过当前effect了
 export const newTracked = (dep: Dep): boolean => (dep.n & trackOpBit) > 0
 
 export const initDepMarkers = ({ deps }: ReactiveEffect) => {
