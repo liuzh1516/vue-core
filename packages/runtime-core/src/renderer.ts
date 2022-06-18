@@ -1552,6 +1552,7 @@ function baseCreateRenderer(
     // create reactive effect for rendering
     const effect = (instance.effect = new ReactiveEffect(
       componentUpdateFn,
+      //lzh：模板里引用了的属性发生了变化触发
       () => queueJob(update),
       instance.scope // track it in component's effect scope
     ))
